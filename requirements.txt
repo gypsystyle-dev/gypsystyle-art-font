@@ -1,0 +1,3 @@
+fonttools==4.55.3
+skia-pathops==0.8.0.post2
+brotli==1.1.0
