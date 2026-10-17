@@ -9,7 +9,7 @@ It started as the caption font of [Keepers](https://keepers.gypsystyle.art), a p
 - **Weights:** Thin, Light, Medium, Bold, Black
 - **Scripts:** Latin (English, Spanish), Cyrillic (Russian) — 198 characters, including € × → ← ↔ ↑ ↓ ° © №
 - **Formats:** OTF for desktop and Figma, WOFF2 for the web
-- **Version:** 1.500 (17 October 2026)
+- **Version:** 1.600 (17 October 2026)
 
 ## Install
 
@@ -42,7 +42,7 @@ python -m venv .venv && .venv/bin/pip install -r requirements.txt
 
 1. **Redraws every line by vector drawing rules** (`tools/refit.py`): as few nodes as possible, nodes on extremes with horizontal or vertical handles, nodes on inflections, closed shapes without seams, near-straight lines snapped to the axis, line ends snapped onto the stems and bowls they touch.
 2. **Keeps the pen inside the lines:** a round pen sticks out half its width past the centerline, so the centerline is compressed per weight and the pen edge lands exactly on baseline, x-height, cap height and descender; round shapes overshoot by 10 units.
-3. **Strokes** each line with a round pen at five widths (25, 55, 75, 108, 138 per 1000) and merges overlaps.
+3. **Strokes** each line with a round pen at five widths (25, 55, 75, 108, 124 per 1000) and merges overlaps.
 4. **Spaces optically** (`tools/spacing.py`, Tracy / HT Letterspacer method): equal white area at each side, measured to 15 % depth and calibrated on «n» and «H» for every weight.
 5. Adds € × arrows ° © № and @ (`tools/extra_glyphs.py`) and writes `fonts/otf` and `fonts/woff2`.
 

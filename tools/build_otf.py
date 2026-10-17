@@ -21,9 +21,9 @@ UPM, SCALE = 1000, 0.92        # знаки на 8 % мельче: рядом с
 S = 35.0 * SCALE               # прописная 20 ед. источника → 644
 TRACK = -12                    # трекинг чуть плотнее, ед. на знак (1.100, 17.10.2026)
 CORNER_DEG = 35                # излом больше — угол, меньше — сглаживаем
-VERSION = '1.500'
+VERSION = '1.600'
 # толщина пера, ед. на 1000; потолок задаёт «е»: три штриха и два просвета на высоте строчных 462 (1.400)
-WEIGHTS = [('Thin', 100, 25), ('Light', 300, 55), ('Medium', 500, 75), ('Bold', 700, 108), ('Black', 900, 138)]
+WEIGHTS = [('Thin', 100, 25), ('Light', 300, 55), ('Medium', 500, 75), ('Bold', 700, 108), ('Black', 900, 124)]
 FAMILY, PS = 'gypsystyle.art', 'GypsyStyleArt'
 COPY = ('Copyright 2013 The Exo 2 Project Authors (https://github.com/googlefonts/Exo-2.0). '
         'Copyright 2026 Vsevolod Belikov (Gypsy Style), https://gypsystyle.art')
