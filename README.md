@@ -7,9 +7,9 @@ A monoline typeface by **Vsevolod Belikov (Gypsy Style)** — [gypsystyle.art](h
 It started as the caption font of [Keepers](https://keepers.gypsystyle.art), a photobook app: letters drawn as single lines, like a pencil on white paper. This release expands those lines with a round pen into an installable font for desktop apps and Figma.
 
 - **Weights:** Thin, Light, Medium, Bold, Black
-- **Scripts:** Latin (English, Spanish), Cyrillic (Russian) — 187 characters
+- **Scripts:** Latin (English, Spanish), Cyrillic (Russian) — 198 characters, including € × → ← ↔ ↑ ↓ ° © №
 - **Formats:** OTF for desktop and Figma, WOFF2 for the web
-- **Version:** 1.000 (17 October 2026)
+- **Version:** 1.500 (17 October 2026)
 
 ## Install
 
@@ -38,8 +38,14 @@ python -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python tools/build_otf.py
 ```
 
-`sources/centerlines.json` holds each glyph as `[left, right, "SVG path"]` in source units (baseline y = 0, up is negative, cap height 20). The script strokes the paths with a round pen at five widths, merges overlaps and writes `fonts/otf` and `fonts/woff2`.
+`sources/centerlines.json` holds each glyph as `[left, right, "SVG path"]` in source units (baseline y = 0, up is negative, cap height 20). The build:
+
+1. **Redraws every line by vector drawing rules** (`tools/refit.py`): as few nodes as possible, nodes on extremes with horizontal or vertical handles, nodes on inflections, closed shapes without seams, near-straight lines snapped to the axis, line ends snapped onto the stems and bowls they touch.
+2. **Keeps the pen inside the lines:** a round pen sticks out half its width past the centerline, so the centerline is compressed per weight and the pen edge lands exactly on baseline, x-height, cap height and descender; round shapes overshoot by 10 units.
+3. **Strokes** each line with a round pen at five widths (25, 55, 75, 108, 138 per 1000) and merges overlaps.
+4. **Spaces optically** (`tools/spacing.py`, Tracy / HT Letterspacer method): equal white area at each side, measured to 15 % depth and calibrated on «n» and «H» for every weight.
+5. Adds € × arrows ° © № and @ (`tools/extra_glyphs.py`) and writes `fonts/otf` and `fonts/woff2`.
 
 ## Known limits
 
-No kerning yet; Serbian Latin and Cyrillic, € and № are planned for 1.1.
+No kerning yet; Serbian Latin and Cyrillic are planned next.
