@@ -4,7 +4,7 @@
 (skia-pathops), перекрытия сливаются, результат — OTF (CFF) пяти весов + WOFF2.
 Запуск: <venv>/bin/python tools/font/build_otf.py  (нужны fonttools, skia-pathops, brotli)
 """
-import json, re, sys
+import json, math, re, sys
 from pathlib import Path
 import pathops
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -21,7 +21,7 @@ UPM, SCALE = 1000, 0.92        # знаки на 8 % мельче: рядом с
 S = 35.0 * SCALE               # прописная 20 ед. источника → 644
 TRACK = -12                    # трекинг чуть плотнее, ед. на знак (1.100, 17.10.2026)
 CORNER_DEG = 35                # излом больше — угол, меньше — сглаживаем
-VERSION = '1.600'
+VERSION = '1.700'
 # толщина пера, ед. на 1000; потолок задаёт «е»: три штриха и два просвета на высоте строчных 462 (1.400)
 WEIGHTS = [('Thin', 100, 25), ('Light', 300, 55), ('Medium', 500, 75), ('Bold', 700, 108), ('Black', 900, 124)]
 FAMILY, PS = 'gypsystyle.art', 'GypsyStyleArt'
@@ -365,7 +365,7 @@ def build(meta, glyphs, style, wclass, w):
         pen.moveTo((a, b)); pen.lineTo((c, b)); pen.lineTo((c, e)); pen.lineTo((a, e)); pen.closePath()
         pen.moveTo((a + w, b + w)); pen.lineTo((a + w, e - w)); pen.lineTo((c - w, e - w)); pen.lineTo((c - w, b + w)); pen.closePath()
     charstrings['.notdef'] = pen.getCharString(); metrics['.notdef'] = (500, 50)
-    ymax, ymin = 0, 0
+    ymax, ymin, top = 0, 0, {}
     for ch, (left, right, d) in sorted(glyphs.items(), key=lambda kv: ord(kv[0])):
         name = 'space' if ch == ' ' else 'uni%04X' % ord(ch)
         adv = round((right - left) * S + w + TRACK)
@@ -379,7 +379,7 @@ def build(meta, glyphs, style, wclass, w):
         pen = T2CharStringPen(adv, None); rec.replay(pen)
         charstrings[name] = pen.getCharString()
         lsb = round(bp.bounds[0]) if bp.bounds else 0
-        if bp.bounds: ymax, ymin = max(ymax, bp.bounds[3]), min(ymin, bp.bounds[1])
+        if bp.bounds: ymax, ymin, top[ch] = max(ymax, bp.bounds[3]), min(ymin, bp.bounds[1]), bp.bounds[3]
         metrics[name] = (adv, lsb); order.append(name); cmap[ord(ch)] = name
     if 0xA0 not in cmap:   # неразрывный пробел — как пробел (подписи Keepers с NBSP)
         cmap[0xA0] = 'space'
@@ -402,13 +402,16 @@ def build(meta, glyphs, style, wclass, w):
     fb.setupCFF(psname, {'FullName': f'{FAMILY} {style}', 'FamilyName': FAMILY, 'Weight': style,
                          'Copyright': COPY, 'version': VERSION}, charstrings, {})
     fb.setupHorizontalMetrics(metrics)
-    # середина прописных = середина строки (asc − desc = прописная 644); высота строки как у Outfit (1260)
-    asc, desc = 952, 308
+    # 1.700: середина строки между центрами прописных и строчных (asc − desc = 560 ≈ (661 + 462) / 2),
+    # обе группы ≤ 1 px от центра при 20 px; сумма 1260 прежняя — line-height: normal на сайте не меняется (219)
+    asc, desc = 910, 350
+    cap, xh = round(top['H']), round(top['x'])               # высоты по контурам, не по мете источника
+    assert abs(cap - 661) <= 2 and abs(xh - 462) <= 2, (style, cap, xh)
     fb.setupHorizontalHeader(ascent=asc, descent=-desc, lineGap=0)
     fb.setupOS2(version=4, sTypoAscender=asc, sTypoDescender=-desc, sTypoLineGap=0,
-                usWinAscent=max(asc, round(ymax) + 10), usWinDescent=max(desc, round(-ymin) + 10),
-                usWeightClass=wclass, achVendID='GYPS', sxHeight=round(meta['xHeight'] * S),
-                sCapHeight=round(meta['capHeight'] * S), fsType=0,
+                usWinAscent=math.ceil(ymax), usWinDescent=math.ceil(-ymin),   # win — по факту контуров веса
+                usWeightClass=wclass, achVendID='GYPS', sxHeight=xh,
+                sCapHeight=cap, fsType=0,
                 fsSelection=(0x20 if ribbi else 0) | 0x80)
     fb.setupPost()
     fb.font['head'].macStyle = 1 if ribbi else 0

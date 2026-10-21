@@ -9,7 +9,7 @@ It started as the caption font of [Keepers](https://keepers.gypsystyle.art), a p
 - **Weights:** Thin, Light, Medium, Bold, Black
 - **Scripts:** Latin (English, Spanish), Cyrillic (Russian) — 198 characters, including € × → ← ↔ ↑ ↓ ° © №
 - **Formats:** OTF for desktop and Figma, WOFF2 for the web
-- **Version:** 1.600 (17 October 2026)
+- **Version:** 1.700 (21 October 2026) — the line sits on the optical centre: ascender 910, descender 350, cap height 661, x-height 462
 
 ## Install
 
